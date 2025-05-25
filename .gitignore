@@ -5,3 +5,6 @@
 # Configurações de ambiente virtual
 venv/
 .env
+
+# Repositório coleira-tech-api
+coleira-tech-api/
