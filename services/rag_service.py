@@ -7,6 +7,6 @@ class RagService:
         self.query_engine = self.embedding_store.get_index().as_query_engine()
 
     def query(self, question):
-        print(f"💬 Pergunta recebida: {question}")
+        print(f"Pergunta recebida: {question}")
         response = self.query_engine.query(question)
         return str(response)
