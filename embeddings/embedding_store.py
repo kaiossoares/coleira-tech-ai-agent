@@ -1,5 +1,4 @@
 from llama_index.core import SimpleDirectoryReader, VectorStoreIndex, Settings
-from llama_index.core.node_parser import SentenceWindowNodeParser
 from llama_index.embeddings.huggingface import HuggingFaceEmbedding
 from llama_index.llms.openai import OpenAI
 from llama_index.core.prompts import PromptTemplate
