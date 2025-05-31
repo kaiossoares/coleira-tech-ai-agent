@@ -13,7 +13,7 @@ if st.button("Enviar"):
         response = requests.post("http://localhost:5000/query", json={"question": question})
         
         if response.status_code == 200:
-            st.write("Resposta:", response.json().get("response"))
+            st.write(response.json().get("response"))
         else:
             st.write("Erro ao obter resposta do servidor.")
     else:

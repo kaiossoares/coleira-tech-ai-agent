@@ -19,7 +19,7 @@ class EmbeddingStore:
         print("Quebrando em pedaços menores...")
         parser = CodeSplitter(
             language="java",
-            chunk_lines=40
+            chunk_lines=80
         )
         nodes = parser.get_nodes_from_documents(documents)
 
@@ -39,13 +39,13 @@ class EmbeddingStore:
     def get_query_engine(self):
         prompt = PromptTemplate(
             """
-            Você é um assistente especializado em ler códigos Java da API Coleira Tech.
+            Você é um assistente especializado em ler códigos Java do projeto API Coleira Tech.
 
             Responda à pergunta utilizando **apenas** as informações dos documentos fornecidos abaixo.
 
             Busque por declarações de funções, métodos, classes e seus comportamentos.
 
-            Se não encontrar a resposta, diga: "Informação não encontrada nos documentos".
+            Se não encontrar a resposta, diga: "Faça uma pergunta um pouco mais especifica e detalhada relacionada a api Coleira Tech.".
 
             Contexto dos documentos:
             -------------------------
@@ -59,6 +59,6 @@ class EmbeddingStore:
         )
 
         return self.index.as_query_engine(
-            similarity_top_k=5,
+            similarity_top_k=10,
             text_qa_template=prompt
         )
