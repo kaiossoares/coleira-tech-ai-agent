@@ -2,6 +2,8 @@ from flask import request
 import streamlit as st
 import requests
 
+st.set_page_config(page_title="Coleira Chatbot", layout="wide")
+
 st.title("Coleira Tech Chatbot")
 
 question = st.text_input("Digite sua pergunta:")

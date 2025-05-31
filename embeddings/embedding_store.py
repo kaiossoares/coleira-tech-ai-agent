@@ -36,9 +36,6 @@ class EmbeddingStore:
         print("Gerando índice vetorial...")
         self.index = VectorStoreIndex(nodes)
 
-    def get_index(self):
-        return self.index
-
     def get_query_engine(self):
         prompt = PromptTemplate(
             """
