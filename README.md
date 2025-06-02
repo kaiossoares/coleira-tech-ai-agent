@@ -2,6 +2,8 @@
 
 O **Coleira Tech AI Agent** é um agente de IA projetado para auxiliar novos desenvolvedores na manutenção e evolução da [API da Coleira Tech](https://github.com/leandro-nnogueira/coleira-tech-api). Ele utiliza técnicas de Recuperação Aumentada por Geração (RAG), processamento de linguagem natural e embeddings para responder perguntas e fornecer informações relevantes sobre o projeto.
 
+![aiAgent](https://github.com/user-attachments/assets/56f06af7-6e44-401f-82fe-28d3473adcf2)
+
 ## Funcionalidades
 
 - **Chatbot interativo** para dúvidas sobre o código da API Coleira Tech.
