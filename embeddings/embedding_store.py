@@ -1,28 +1,63 @@
-from sentence_transformers import SentenceTransformer, util
+from llama_index.core import SimpleDirectoryReader, VectorStoreIndex, Settings
+from llama_index.embeddings.huggingface import HuggingFaceEmbedding
+from llama_index.llms.openai import OpenAI
+from llama_index.core.prompts import PromptTemplate
+from llama_index.core.node_parser import CodeSplitter
 
 class EmbeddingStore:
     def __init__(self):
-        self.documents = [
-            {"id": 1, "text": "A Coleira Tech, é a coleira mais inteligente do mundo, com GPS, monitoramento de saúde e muito mais."},
-            {"id": 2, "text": "A API da Coleira Tech foi feita em Java com Spring Boot, com estrutura MVC."},
-            {"id": 3, "text": "O grupo Coleira Tech escolheu uma Ong que foi a Gaar Campinas, que trabalha principalmente em Barão Geraldo. A Gaar Campinas auxílio o projeto com instruções sobre como fazer o projeto e também com a parte de marketing."},
-        ]
-        self.model = SentenceTransformer("all-MiniLM-L6-v2")
-        self.doc_embeddings = {
-            doc["id"]: self.model.encode(doc["text"], convert_to_tensor=True)
-            for doc in self.documents
-        }
+        print("Carregando documentos...")
+        documents = SimpleDirectoryReader(
+            input_dir="coleira-tech-api/src/main/java/com/coleiratech/Coleira/Tech",
+            recursive=True,
+            required_exts=[".java", ".md", ".txt"]
+        ).load_data()
 
-    def find_best_document(self, query):
-        query_embedding = self.model.encode(query, convert_to_tensor=True)
+        print(f"{len(documents)} documentos carregados.")
 
-        best_doc = None
-        best_score = float("-inf")
+        print("Quebrando em pedaços menores...")
+        parser = CodeSplitter(
+            language="java",
+            chunk_lines=80
+        )
+        nodes = parser.get_nodes_from_documents(documents)
 
-        for doc in self.documents:
-            score = util.cos_sim(query_embedding, self.doc_embeddings[doc["id"]])
-            if score > best_score:
-                best_score = score
-                best_doc = doc
+        print("Criando embeddings...")
+        embed_model = HuggingFaceEmbedding(model_name="BAAI/bge-base-en-v1.5")
 
-        return best_doc
+        print("Conectando com OpenAI...")
+        llm = OpenAI(model="gpt-4o")
+
+        print("Aplicando configurações globais...")
+        Settings.llm = llm
+        Settings.embed_model = embed_model
+
+        print("Gerando índice vetorial...")
+        self.index = VectorStoreIndex(nodes)
+
+    def get_query_engine(self):
+        prompt = PromptTemplate(
+            """
+            Você é um assistente especializado em ler códigos Java do projeto API Coleira Tech.
+
+            Responda à pergunta utilizando **apenas** as informações dos documentos fornecidos abaixo.
+
+            Busque por declarações de funções, métodos, classes e seus comportamentos.
+
+            Se não encontrar a resposta, diga: "Faça uma pergunta um pouco mais especifica e detalhada relacionada a api Coleira Tech.".
+
+            Contexto dos documentos:
+            -------------------------
+            {context_str}
+            -------------------------
+
+            Pergunta: {query_str}
+
+            Resposta:
+            """
+        )
+
+        return self.index.as_query_engine(
+            similarity_top_k=10,
+            text_qa_template=prompt
+        )

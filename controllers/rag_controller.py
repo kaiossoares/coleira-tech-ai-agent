@@ -1,26 +1,19 @@
-from flask_smorest import Blueprint, abort
-from flask import request
-from models.query_request import QueryRequest
+from flask_smorest import Blueprint  
+from flask import request, jsonify
+from services.rag_service import RagService
 
-def create_rag_controller(rag_service):
-    # Use o Blueprint do Flask-Smorest
-    blp = Blueprint("rag", __name__, url_prefix="/rag")
+def create_rag_controller(rag_service: RagService):
+    rag_blueprint = Blueprint("rag", __name__, description="RAG-related operations")  
 
-    @blp.route("/query", methods=["POST"])
-    def query_rag():
-        query_data = request.get_json()
-        if not query_data or "query" not in query_data:
-            abort(400, message="Missing 'query' field in request body")
+    @rag_blueprint.route("/query", methods=["POST"])
+    @rag_blueprint.response(200, description="Query response")  
+    def query():
+        data = request.get_json()
+        question = data.get("question", "")
+        if not question:
+            return jsonify({"error": "Missing question"}), 400
 
-        try:
-            query_request = QueryRequest(**query_data)
-        except Exception as e:
-            abort(400, message=f"Invalid request format: {e}")
+        response = rag_service.query(question)
+        return jsonify({"response": response})
 
-        try:
-            response = rag_service.ask(query_request.query)
-            return {"response": response}
-        except Exception as e:
-            abort(500, message=f"Error processing the request: {e}")
-
-    return blp
+    return rag_blueprint
